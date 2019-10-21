@@ -1,0 +1,54 @@
+  <!DOCTYPE html>
+  <html>
+
+  <head>
+      <!--Import Google Icon Font-->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body class="indigo">
+      <header class="indigo darken-1 section">
+          <h2 class="white-text center">Budgety</h2>
+          <p class="flow-text grey-text center text-lighten-2">Monthly budgeting app</p>
+      </header>
+
+      <div class="container section">
+          <div class="row">
+              <div class="col s12 m6">
+                  <form class="card z-depth-0">
+                      <div class="card-content">
+                          <span class="card-title indigo-text">Add item:</span>
+                          <div class="input-field">
+                              <input type="text" name="name">
+                              <label for="name">Item Name</label>
+                          </div>
+                          <div class="input-field">
+                              <input type="text" name="cost">
+                              <label for="cost">Item cost ($)</label>
+                          </div>
+                          <div class="input-field center">
+                              <button class="btn-large pink white-text">Add Item</button>
+                          </div>
+                          <div class="input-field center">
+                              <p class="red-text" id="error">test</p>
+                          </div>
+                      </div>
+                  </form>
+              </div>
+              <div class="col s12 m6 push-m1">
+                  <div class="canvas"></div>
+              </div>
+          </div>
+      </div>
+
+      <!--JavaScript at end of body for optimized loading-->
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+      <script type="text/javascript" src="bundle.js"></script>
+  </body>
+
+  </html>
