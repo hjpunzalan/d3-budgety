@@ -45,10 +45,10 @@ export default (function() {
 
 		// handle exit selection
 		paths
-			.exit()
+			.exit<d3.PieArcDatum<pieData>>()
 			.transition()
 			.duration(750) // 750ms
-			.attrTween('d', <any>arcTweenExit)
+			.attrTween('d', arcTweenExit)
 			.remove();
 
 		// handle current selection
