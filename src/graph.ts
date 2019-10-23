@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import * as d3SVGLegend from 'd3-svg-legend';
 
 declare const db: any;
 
@@ -37,12 +38,26 @@ export default (function() {
 		.innerRadius(dims.radius / 2);
 
 	// ordinal scale
-	const colour = d3.scaleOrdinal(d3['schemeSet3']);
+	const colour = d3.scaleOrdinal(d3['schemeSet2']);
+
+	const legendGroup = svg
+		.append('g')
+		.attr('transform', `translate(${dims.width + 40}, 10)`); // setting the position
+
+	const legend = d3SVGLegend
+		.legendColor()
+		.shape('circle')
+		.shapePadding(10)
+		.scale(colour); // match to colour scale
 
 	// update function
 	const update = (data: pieData[]): void => {
 		// update colour scale domain
 		colour.domain(data.map(d => d.name));
+
+		// update and call legend
+		legendGroup.call(<any>legend); // need type
+		legendGroup.selectAll('text').attr('fill', 'white');
 
 		// join enhanced (pie) data to path element
 		const paths = graph.selectAll<PathElement, pieData>('path').data(pie(data));
@@ -120,7 +135,6 @@ export default (function() {
 			return String(arcPath(d));
 		};
 	};
-
 	// use function keyword so 'this' will be dynamically scoped
 	// Using updated data
 	function arcTweenUpdate(this: PathElement, d: d3.PieArcDatum<pieData>) {

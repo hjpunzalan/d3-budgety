@@ -21,6 +21,7 @@
     "@types/d3": "^5.7.2",
     "@types/materialize-css": "^1.0.6",
     "d3": "^5.12.0",
+    "d3-svg-legend": "^2.25.6",
     "materialize-css": "^1.0.0-rc.2"
   },
   "devDependencies": {
