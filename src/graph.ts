@@ -44,7 +44,12 @@ export default (function() {
 		const paths = graph.selectAll('path').data(pie(data));
 
 		// handle exit selection
-		paths.exit().remove();
+		paths
+			.exit()
+			.transition()
+			.duration(750) // 750ms
+			.attrTween('d', <any>arcTweenExit)
+			.remove();
 
 		// handle current selection
 		// Only need to update data as there won't be any paths on the template.html
@@ -88,6 +93,16 @@ export default (function() {
 
 	const arcTweenEnter = (d: d3.PieArcDatum<pieData>) => {
 		let i = d3.interpolate(d.endAngle, d.startAngle);
+
+		return function(t: number) {
+			d.startAngle = i(t);
+			return String(arcPath(d));
+		};
+	};
+
+	const arcTweenExit = (d: d3.PieArcDatum<pieData>) => {
+		console.log(d);
+		let i = d3.interpolate(d.startAngle, d.endAngle);
 
 		return function(t: number) {
 			d.startAngle = i(t);
