@@ -127,7 +127,7 @@ export default (function() {
 		// interpolate between the two objects and not just angles because interpolation may happen in two of the angles or one
 		let i = d3.interpolate(this._current, d);
 
-		// update the current prop with the new updated data
+		// update the current prop with the new updated data for future changes
 		this._current = i(1); // or d
 
 		return function(t: number) {
