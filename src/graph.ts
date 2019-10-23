@@ -43,6 +43,14 @@ export default (function() {
 		// join enhanced (pie) data to path element
 		const paths = graph.selectAll('path').data(pie(data));
 
+		// handle exit selection
+		paths.exit().remove();
+
+		// handle current selection
+		// Only need to update data as there won't be any paths on the template.html
+		paths.attr('d', (d: d3.PieArcDatum<pieData>) => arcPath(d));
+
+		// handle enter selection
 		paths
 			.enter()
 			.append('path')
