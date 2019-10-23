@@ -48,17 +48,20 @@ export default (function() {
 
 		// handle current selection
 		// Only need to update data as there won't be any paths on the template.html
-		paths.attr('d', (d: d3.PieArcDatum<pieData>) => arcPath(d));
+		// Updates data of all paths
+		paths.attr('d', arcPath);
 
 		// handle enter selection
 		paths
 			.enter()
 			.append('path')
 			.attr('class', 'arc')
-			.attr('d', (d: d3.PieArcDatum<pieData>) => arcPath(d))
 			.attr('stroke', '#fff')
 			.attr('stroke-width', 3)
-			.attr('fill', d => colour(d.data.name));
+			.attr('fill', d => colour(d.data.name))
+			.transition()
+			.duration(750) // 750ms
+			.attrTween('d', arcTweenEnter);
 	};
 
 	let data: pieData[] = [];
@@ -82,4 +85,13 @@ export default (function() {
 		});
 		update(data);
 	});
+
+	const arcTweenEnter = (d: d3.PieArcDatum<pieData>) => {
+		let i = d3.interpolate(d.endAngle, d.startAngle);
+
+		return function(t: number) {
+			d.startAngle = i(t);
+			return String(arcPath(d));
+		};
+	};
 })();
