@@ -8,6 +8,10 @@ interface pieData {
 	cost: number;
 }
 
+interface PathElement extends SVGPathElement {
+	_current: d3.PieArcDatum<pieData>;
+}
+
 export default (function() {
 	const dims = { height: 300, width: 300, radius: 150 }; // dimension of the pie chart
 	// 5px extra
@@ -41,7 +45,7 @@ export default (function() {
 		colour.domain(data.map(d => d.name));
 
 		// join enhanced (pie) data to path element
-		const paths = graph.selectAll('path').data(pie(data));
+		const paths = graph.selectAll<PathElement, pieData>('path').data(pie(data));
 
 		// handle exit selection
 		paths
@@ -54,16 +58,23 @@ export default (function() {
 		// handle current selection
 		// Only need to update data as there won't be any paths on the template.html
 		// Updates data of all paths
-		paths.attr('d', arcPath);
+		paths
+			.attr('d', arcPath)
+			.transition()
+			.duration(750)
+			.attrTween('d', arcTweenUpdate);
 
 		// handle enter selection
 		paths
 			.enter()
-			.append('path')
+			.append<PathElement>('path')
 			.attr('class', 'arc')
 			.attr('stroke', '#fff')
 			.attr('stroke-width', 3)
 			.attr('fill', d => colour(d.data.name))
+			.each(function(d) {
+				this._current = d;
+			})
 			.transition()
 			.duration(750) // 750ms
 			.attrTween('d', arcTweenEnter);
@@ -109,4 +120,18 @@ export default (function() {
 			return String(arcPath(d));
 		};
 	};
+
+	// use function keyword so 'this' will be dynamically scoped
+	// Using updated data
+	function arcTweenUpdate(this: PathElement, d: d3.PieArcDatum<pieData>) {
+		// interpolate between the two objects and not just angles because interpolation may happen in two of the angles or one
+		let i = d3.interpolate(this._current, d);
+
+		// update the current prop with the new updated data
+		this._current = i(1); // or d
+
+		return function(t: number) {
+			return String(arcPath(i(t)));
+		};
+	}
 })();
