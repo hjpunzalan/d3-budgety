@@ -1,3 +1,5 @@
+import './graph';
+
 declare const db: any;
 (function() {
 	const form = document.querySelector('form');
