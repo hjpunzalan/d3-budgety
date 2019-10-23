@@ -32,8 +32,14 @@ export default (function() {
 		.outerRadius(dims.radius)
 		.innerRadius(dims.radius / 2);
 
+	// ordinal scale
+	const colour = d3.scaleOrdinal(d3['schemeSet3']);
+
 	// update function
 	const update = (data: pieData[]): void => {
+		// update colour scale domain
+		colour.domain(data.map(d => d.name));
+
 		// join enhanced (pie) data to path element
 		const paths = graph.selectAll('path').data(pie(data));
 
@@ -43,7 +49,8 @@ export default (function() {
 			.attr('class', 'arc')
 			.attr('d', (d: d3.PieArcDatum<pieData>) => arcPath(d))
 			.attr('stroke', '#fff')
-			.attr('stroke-width', 3);
+			.attr('stroke-width', 3)
+			.attr('fill', d => colour(d.data.name));
 	};
 
 	let data: pieData[] = [];
