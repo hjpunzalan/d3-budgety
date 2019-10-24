@@ -159,21 +159,20 @@ export default (function() {
 	const handleMouseOver = (
 		d: PieArcDatum<pieData>,
 		i: number,
-		n: ArrayLike<PathElement>
+		n: ArrayLike<PathElement> | NodeListOf<PathElement>
 	): void => {
-		console.log(n);
 		d3.select(n[i])
-			.transition()
+			.transition('changeSliceFill') // added name to prevent affecting other transitions such as entering and exiting
 			.duration(300)
 			.attr('fill', '#fff');
 	};
 	const handleMouseOut = (
 		d: PieArcDatum<pieData>,
 		i: number,
-		n: ArrayLike<PathElement>
+		n: ArrayLike<PathElement> | NodeListOf<PathElement>
 	): void => {
 		d3.select(n[i])
-			.transition()
+			.transition('changeSliceFill') // added name to prevent affecting other transitions such as entering and exiting
 			.duration(300)
 			.attr('fill', colour(d.data.name));
 	};
