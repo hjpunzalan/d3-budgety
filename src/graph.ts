@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import * as d3SVGLegend from 'd3-svg-legend';
+import { Path, PieArcDatum } from 'd3';
 
 declare const db: any;
 
@@ -10,7 +11,7 @@ interface pieData {
 }
 
 interface PathElement extends SVGPathElement {
-	_current: d3.PieArcDatum<pieData>;
+	_current: PieArcDatum<pieData>;
 }
 
 export default (function() {
@@ -33,7 +34,7 @@ export default (function() {
 		.value(d => d.cost);
 
 	const arcPath = d3
-		.arc<d3.PieArcDatum<pieData>>()
+		.arc<PieArcDatum<pieData>>()
 		.outerRadius(dims.radius)
 		.innerRadius(dims.radius / 2);
 
@@ -64,7 +65,7 @@ export default (function() {
 
 		// handle exit selection
 		paths
-			.exit<d3.PieArcDatum<pieData>>()
+			.exit<PieArcDatum<pieData>>()
 			.transition()
 			.duration(750) // 750ms
 			.attrTween('d', arcTweenExit)
@@ -93,6 +94,12 @@ export default (function() {
 			.transition()
 			.duration(750) // 750ms
 			.attrTween('d', arcTweenEnter);
+
+		// add events
+		graph
+			.selectAll<PathElement, PieArcDatum<pieData>>('path')
+			.on('mouseover', handleMouseOver)
+			.on('mouseout', handleMouseOut);
 	};
 
 	let data: pieData[] = [];
@@ -117,7 +124,7 @@ export default (function() {
 		update(data);
 	});
 
-	const arcTweenEnter = (d: d3.PieArcDatum<pieData>) => {
+	const arcTweenEnter = (d: PieArcDatum<pieData>) => {
 		let i = d3.interpolate(d.endAngle, d.startAngle);
 
 		return function(t: number) {
@@ -126,7 +133,7 @@ export default (function() {
 		};
 	};
 
-	const arcTweenExit = (d: d3.PieArcDatum<pieData>) => {
+	const arcTweenExit = (d: PieArcDatum<pieData>) => {
 		console.log(d);
 		let i = d3.interpolate(d.startAngle, d.endAngle);
 
@@ -137,7 +144,7 @@ export default (function() {
 	};
 	// use function keyword so 'this' will be dynamically scoped
 	// Using updated data
-	function arcTweenUpdate(this: PathElement, d: d3.PieArcDatum<pieData>) {
+	function arcTweenUpdate(this: PathElement, d: PieArcDatum<pieData>) {
 		// interpolate between the two objects and not just angles because interpolation may happen in two of the angles or one
 		let i = d3.interpolate(this._current, d);
 
@@ -148,4 +155,26 @@ export default (function() {
 			return String(arcPath(i(t)));
 		};
 	}
+	// event handlers
+	const handleMouseOver = (
+		d: PieArcDatum<pieData>,
+		i: number,
+		n: ArrayLike<PathElement>
+	): void => {
+		console.log(n);
+		d3.select(n[i])
+			.transition()
+			.duration(300)
+			.attr('fill', '#fff');
+	};
+	const handleMouseOut = (
+		d: PieArcDatum<pieData>,
+		i: number,
+		n: ArrayLike<PathElement>
+	): void => {
+		d3.select(n[i])
+			.transition()
+			.duration(300)
+			.attr('fill', colour(d.data.name));
+	};
 })();
