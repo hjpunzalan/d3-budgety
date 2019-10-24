@@ -99,7 +99,8 @@ export default (function() {
 		graph
 			.selectAll<PathElement, PieArcDatum<pieData>>('path')
 			.on('mouseover', handleMouseOver)
-			.on('mouseout', handleMouseOut);
+			.on('mouseout', handleMouseOut)
+			.on('click', handleClick);
 	};
 
 	let data: pieData[] = [];
@@ -134,7 +135,6 @@ export default (function() {
 	};
 
 	const arcTweenExit = (d: PieArcDatum<pieData>) => {
-		console.log(d);
 		let i = d3.interpolate(d.startAngle, d.endAngle);
 
 		return function(t: number) {
@@ -163,7 +163,7 @@ export default (function() {
 	): void => {
 		d3.select(n[i])
 			.transition('changeSliceFill') // added name to prevent affecting other transitions such as entering and exiting
-			.duration(300)
+			.duration(200)
 			.attr('fill', '#fff');
 	};
 	const handleMouseOut = (
@@ -173,7 +173,14 @@ export default (function() {
 	): void => {
 		d3.select(n[i])
 			.transition('changeSliceFill') // added name to prevent affecting other transitions such as entering and exiting
-			.duration(300)
+			.duration(200)
 			.attr('fill', colour(d.data.name));
+	};
+
+	const handleClick = (d: PieArcDatum<pieData>) => {
+		const id = d.data.id;
+		db.collection('expenses')
+			.doc(id)
+			.delete();
 	};
 })();
