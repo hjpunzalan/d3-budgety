@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
-import * as d3SVGLegend from 'd3-svg-legend';
-import { Path, PieArcDatum } from 'd3';
+import d3Tip from 'd3-tip';
+import { PieArcDatum } from 'd3';
+import d3SVGLegend from 'd3-svg-legend';
 
 declare const db: any;
 
@@ -51,6 +52,16 @@ export default (function() {
 		.shapePadding(10)
 		.scale(colour); // match to colour scale
 
+	const tip = d3Tip()
+		.attr('class', 'tip card')
+		.html((d: PieArcDatum<pieData>) => {
+			let content = `<div class="name">${d.data.name}</div>`;
+			content += `<div class="cost">$${d.data.cost}</div>`;
+			content += `<div class="delete">Click slice to delete</div>`;
+			return content;
+		});
+	graph.call(tip); // apply tip to all graph group
+
 	// update function
 	const update = (data: pieData[]): void => {
 		// update colour scale domain
@@ -98,8 +109,28 @@ export default (function() {
 		// add events
 		graph
 			.selectAll<PathElement, PieArcDatum<pieData>>('path')
-			.on('mouseover', handleMouseOver)
-			.on('mouseout', handleMouseOut)
+			.on(
+				'mouseover',
+				(
+					d: PieArcDatum<pieData>,
+					i: number,
+					n: ArrayLike<PathElement> | NodeListOf<PathElement>
+				) => {
+					tip.show(d, n[i]); // n[i] same as this
+					handleMouseOver(d, i, n);
+				}
+			)
+			.on(
+				'mouseout',
+				(
+					d: PieArcDatum<pieData>,
+					i: number,
+					n: ArrayLike<PathElement> | NodeListOf<PathElement>
+				) => {
+					tip.hide(); // n[i] same as this
+					handleMouseOut(d, i, n);
+				}
+			)
 			.on('click', handleClick);
 	};
 
@@ -162,6 +193,7 @@ export default (function() {
 		n: ArrayLike<PathElement> | NodeListOf<PathElement>
 	): void => {
 		d3.select(n[i])
+			.style('cursor', 'pointer')
 			.transition('changeSliceFill') // added name to prevent affecting other transitions such as entering and exiting
 			.duration(200)
 			.attr('fill', '#fff');
