@@ -52,7 +52,7 @@ export default (function() {
 		.shapePadding(10)
 		.scale(colour); // match to colour scale
 
-	const tip = d3Tip()
+	const tip = (d3Tip as Function)()
 		.attr('class', 'tip card')
 		.html((d: PieArcDatum<pieData>) => {
 			let content = `<div class="name">${d.data.name}</div>`;
