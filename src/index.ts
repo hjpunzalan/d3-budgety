@@ -1,6 +1,7 @@
+import { db } from './vendor';
+import './main.scss';
 import './graph';
 
-declare const db: any;
 (function() {
 	const form = document.querySelector('form');
 	const name: HTMLInputElement | null = document.querySelector('#name');

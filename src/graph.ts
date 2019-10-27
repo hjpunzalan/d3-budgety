@@ -2,17 +2,16 @@ import * as d3 from 'd3';
 import d3Tip from 'd3-tip';
 import { PieArcDatum } from 'd3';
 import d3SVGLegend from 'd3-svg-legend';
+import { db } from './vendor';
 
-declare const db: any;
-
-interface pieData {
+interface PieData {
 	id: string;
 	name: string;
 	cost: number;
 }
 
 interface PathElement extends SVGPathElement {
-	_current: PieArcDatum<pieData>;
+	_current: PieArcDatum<PieData>;
 }
 
 export default (function() {
@@ -30,12 +29,12 @@ export default (function() {
 		.attr('transform', `translate(${cent.x}, ${cent.y})`);
 
 	const pie = d3
-		.pie<pieData>()
+		.pie<PieData>()
 		.sort(null) // prevents default sorting
 		.value(d => d.cost);
 
 	const arcPath = d3
-		.arc<PieArcDatum<pieData>>()
+		.arc<PieArcDatum<PieData>>()
 		.outerRadius(dims.radius)
 		.innerRadius(dims.radius / 2);
 
@@ -54,7 +53,7 @@ export default (function() {
 
 	const tip = (d3Tip as Function)()
 		.attr('class', 'tip card')
-		.html((d: PieArcDatum<pieData>) => {
+		.html((d: PieArcDatum<PieData>) => {
 			let content = `<div class="name">${d.data.name}</div>`;
 			content += `<div class="cost">$${d.data.cost}</div>`;
 			content += `<div class="delete">Click slice to delete</div>`;
@@ -63,7 +62,7 @@ export default (function() {
 	graph.call(tip); // apply tip to all graph group
 
 	// update function
-	const update = (data: pieData[]): void => {
+	const update = (data: PieData[]): void => {
 		// update colour scale domain
 		colour.domain(data.map(d => d.name));
 
@@ -72,11 +71,11 @@ export default (function() {
 		legendGroup.selectAll('text').attr('fill', 'white');
 
 		// join enhanced (pie) data to path element
-		const paths = graph.selectAll<PathElement, pieData>('path').data(pie(data));
+		const paths = graph.selectAll<PathElement, PieData>('path').data(pie(data));
 
 		// handle exit selection
 		paths
-			.exit<PieArcDatum<pieData>>()
+			.exit<PieArcDatum<PieData>>()
 			.transition()
 			.duration(750) // 750ms
 			.attrTween('d', arcTweenExit)
@@ -108,11 +107,11 @@ export default (function() {
 
 		// add events
 		graph
-			.selectAll<PathElement, PieArcDatum<pieData>>('path')
+			.selectAll<PathElement, PieArcDatum<PieData>>('path')
 			.on(
 				'mouseover',
 				(
-					d: PieArcDatum<pieData>,
+					d: PieArcDatum<PieData>,
 					i: number,
 					n: ArrayLike<PathElement> | NodeListOf<PathElement>
 				) => {
@@ -123,7 +122,7 @@ export default (function() {
 			.on(
 				'mouseout',
 				(
-					d: PieArcDatum<pieData>,
+					d: PieArcDatum<PieData>,
 					i: number,
 					n: ArrayLike<PathElement> | NodeListOf<PathElement>
 				) => {
@@ -134,10 +133,13 @@ export default (function() {
 			.on('click', handleClick);
 	};
 
-	let data: pieData[] = [];
-	db.collection('expenses').onSnapshot((res: any) => {
-		res.docChanges().forEach((change: any) => {
-			const doc = { ...change.doc.data(), id: change.doc.id };
+	let data: PieData[] = [];
+	db.collection('expenses').onSnapshot(res => {
+		res.docChanges().forEach(change => {
+			const doc: PieData = {
+				...(change.doc.data() as { name: string; cost: number }),
+				id: change.doc.id
+			};
 			switch (change.type) {
 				case 'added':
 					data.push(doc);
@@ -156,7 +158,7 @@ export default (function() {
 		update(data);
 	});
 
-	const arcTweenEnter = (d: PieArcDatum<pieData>) => {
+	const arcTweenEnter = (d: PieArcDatum<PieData>) => {
 		let i = d3.interpolate(d.endAngle, d.startAngle);
 
 		return function(t: number) {
@@ -165,7 +167,7 @@ export default (function() {
 		};
 	};
 
-	const arcTweenExit = (d: PieArcDatum<pieData>) => {
+	const arcTweenExit = (d: PieArcDatum<PieData>) => {
 		let i = d3.interpolate(d.startAngle, d.endAngle);
 
 		return function(t: number) {
@@ -175,7 +177,7 @@ export default (function() {
 	};
 	// use function keyword so 'this' will be dynamically scoped
 	// Using updated data
-	function arcTweenUpdate(this: PathElement, d: PieArcDatum<pieData>) {
+	function arcTweenUpdate(this: PathElement, d: PieArcDatum<PieData>) {
 		// interpolate between the two objects and not just angles because interpolation may happen in two of the angles or one
 		let i = d3.interpolate(this._current, d);
 
@@ -188,7 +190,7 @@ export default (function() {
 	}
 	// event handlers
 	const handleMouseOver = (
-		d: PieArcDatum<pieData>,
+		d: PieArcDatum<PieData>,
 		i: number,
 		n: ArrayLike<PathElement> | NodeListOf<PathElement>
 	): void => {
@@ -199,7 +201,7 @@ export default (function() {
 			.attr('fill', '#fff');
 	};
 	const handleMouseOut = (
-		d: PieArcDatum<pieData>,
+		d: PieArcDatum<PieData>,
 		i: number,
 		n: ArrayLike<PathElement> | NodeListOf<PathElement>
 	): void => {
@@ -209,7 +211,7 @@ export default (function() {
 			.attr('fill', colour(d.data.name));
 	};
 
-	const handleClick = (d: PieArcDatum<pieData>) => {
+	const handleClick = (d: PieArcDatum<PieData>) => {
 		const id = d.data.id;
 		db.collection('expenses')
 			.doc(id)
