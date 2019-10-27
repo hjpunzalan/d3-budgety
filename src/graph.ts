@@ -137,7 +137,7 @@ export default (function() {
 	db.collection('expenses').onSnapshot(res => {
 		res.docChanges().forEach(change => {
 			const doc: PieData = {
-				...(change.doc.data() as { name: string; cost: number }),
+				...(change.doc.data() as PieData),
 				id: change.doc.id
 			};
 			switch (change.type) {
